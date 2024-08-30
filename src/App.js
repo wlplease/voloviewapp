@@ -466,7 +466,7 @@ const ContactPage = ({ onNavigate }) => (
   I agree to the 
   <button onClick={() => onNavigate('terms')} style={{ background: 'none', border: 'none', padding: 0, marginLeft: '5px', textDecoration: 'underline', color: 'blue', cursor: 'pointer' }}>Terms of Service</button> 
   and 
-  <button onClick={() => onNavigate('privacy')} style={{ background: 'none', border: 'none', padding: 0, marginLeft: '5px', textDecoration: 'underline', color: 'blue', cursor: 'pointer' }}>Privacy Policy</button>.
+  <button onClick={() => onNavigate('privacy')} style={{ background: 'none', border: 'none', padding: 0, marginLeft: '5px', textDecoration: 'underline', color: 'blue', cursor: 'pointer' }}>Privacy Policy</button>
 </label>
 
 
@@ -583,9 +583,9 @@ const App = () => {
   return (
     <div style={styles.container}>
       <Header onNavigate={setCurrentPage} />
-      <p style={styles.description}>Welcome to SplitSmart, your go-to app for easily dividing bills and expenses among groups. </p>
+      <p style={styles.description}>Welcome to SplitSmart, your go-to app for easily dividing bills and expenses among groups. Enjoy fair and simple bill splitting with just a few clicks.</p>
 
-      <p>Enjoy fair and simple bill splitting with just a few clicks, including the option to randomly exempt a person from paying their share or randomly select someone to pay the entire bill.</p>
+      <p>Select the option to randomly exempt a person from paying their share, or randomly select someone to pay the entire bill.</p>
       {renderPage()}
       <Footer onNavigate={setCurrentPage} />
     </div>
