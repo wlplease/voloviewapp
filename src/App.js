@@ -413,13 +413,14 @@ const ContactPage = ({ onNavigate }) => (
       <label style={styles.label}>Comments:</label>
       <textarea name="comments" style={{...styles.input, height: '100px'}} />
       
-     <label style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
+    <label style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
   <input type="checkbox" name="agree" style={{ marginRight: '10px' }} />
   I agree to the 
-  <a href="#" onClick={() => onNavigate('terms')} style={{ textDecoration: 'underline', marginLeft: '5px' }}>Terms of Service</a> 
+  <button onClick={() => onNavigate('terms')} style={{ background: 'none', border: 'none', padding: 0, marginLeft: '5px', textDecoration: 'underline', color: 'blue', cursor: 'pointer' }}>Terms of Service</button> 
   and 
-  <a href="#" onClick={() => onNavigate('privacy')} style={{ textDecoration: 'underline', marginLeft: '5px' }}>Privacy Policy</a>.
+  <button onClick={() => onNavigate('privacy')} style={{ background: 'none', border: 'none', padding: 0, marginLeft: '5px', textDecoration: 'underline', color: 'blue', cursor: 'pointer' }}>Privacy Policy</button>.
 </label>
+
 
       
       <button type="submit" style={styles.button}>Submit</button>
