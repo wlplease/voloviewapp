@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
+
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$' },
@@ -166,11 +168,16 @@ const BillInput = ({ totalBill, setTotalBill, currency, setCurrency }) => {
   );
 };
 
-const PeopleManager = ({ numPeople, setNumPeople, names, setNames, exemptPerson, setExemptPerson, shares, setShares }) => {
+const PeopleManager = ({ numPeople, setNumPeople, names, setNames, exemptPerson, setExemptPerson, shares, setShares, setPayingPerson }) => {
 
   const handleRandomizeExemptPerson = () => {
     const randomIndex = Math.floor(Math.random() * numPeople);
     setExemptPerson(randomIndex);
+  };
+
+  const handleRandomizePayingPerson = () => {
+    const randomIndex = Math.floor(Math.random() * numPeople);
+    setPayingPerson(randomIndex);
   };
 
   const handleShareChange = (index, value) => {
@@ -216,14 +223,53 @@ const PeopleManager = ({ numPeople, setNumPeople, names, setNames, exemptPerson,
       <button onClick={handleRandomizeExemptPerson} style={styles.button}>
         Randomize Exempt Person
       </button>
+      <button onClick={handleRandomizePayingPerson} style={styles.button}>
+        Randomize Paying Person
+      </button>
     </div>
   );
 };
 
-const SplitCalculator = ({ totalBill, numPeople, tipPercentage, currency, exemptPerson, names, shares }) => {
+// Add this new component
+const PieChartDisplay = ({ names, perPersonAmounts, totalAmount }) => {
+  const data = names.map((name, index) => ({
+    name,
+    value: (perPersonAmounts[index] / totalAmount) * 100
+  })).filter(item => item.value > 0);
+
+  return (
+    <div style={styles.card}>
+      <h3>Payment Distribution</h3>
+      <PieChart width={300} height={300}>
+        <Pie
+          data={data}
+          cx={150}
+          cy={150}
+          labelLine={false}
+          outerRadius={80}
+          fill="#8884d8"
+          dataKey="value"
+        >
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Pie>
+        <Tooltip />
+        <Legend />
+      </PieChart>
+    </div>
+  );
+};
+
+// Replace your existing SplitCalculator component with this updated version
+const SplitCalculator = ({ totalBill, numPeople, tipPercentage, currency, exemptPerson, names, shares, payingPerson }) => {
   const getCurrencySymbol = (code) => CURRENCIES.find(c => c.code === code)?.symbol || code;
 
   const calculateSplit = () => {
+    if (payingPerson !== null) {
+      return names.map((_, index) => (index === payingPerson ? totalBill.toFixed(2) : "0.00"));
+    }
+
     const tipAmount = totalBill * (tipPercentage / 100);
     const totalAmount = totalBill + tipAmount;
 
@@ -239,47 +285,26 @@ const SplitCalculator = ({ totalBill, numPeople, tipPercentage, currency, exempt
     return perPersonAmounts;
   };
 
-  const renderPieChart = () => {
-    const anglePerPerson = 360 / (numPeople - (exemptPerson !== null ? 1 : 0));
-    const background = names.map((_, index) => {
-      if (index === exemptPerson) return '';
-      const startAngle = index * anglePerPerson;
-      const endAngle = (index + 1) * anglePerPerson;
-      return `${COLORS[index % COLORS.length]} ${startAngle}deg ${endAngle}deg`;
-    }).join(', ');
+  const perPersonAmounts = calculateSplit();
+  const totalAmount = totalBill + (totalBill * (tipPercentage / 100));
 
-    return (
-      <div>
-        <div style={{...styles.pieChart, background: `conic-gradient(${background})`}}></div>
-        <div>
+  return (
+    <div>
+      <div style={styles.card}>
+        <h3>Split Summary</h3>
+        <div style={styles.summary}>
+          <p>Total Bill: {getCurrencySymbol(currency)}{totalBill.toFixed(2)}</p>
+          <p>Tip Percentage: {tipPercentage}%</p>
+          <p>Tip Amount: {getCurrencySymbol(currency)}{(totalBill * (tipPercentage / 100)).toFixed(2)}</p>
+          <p>Total Amount: {getCurrencySymbol(currency)}{totalAmount.toFixed(2)}</p>
           {names.map((name, index) => (
-            <div key={index} style={styles.legendItem}>
-              <div style={{...styles.legendColor, backgroundColor: COLORS[index % COLORS.length]}}></div>
-              <span>{name}{exemptPerson === index ? ' (Exempt)' : ''}</span>
-            </div>
+            <p key={index}>
+              {name}{exemptPerson === index ? ' (Exempt)' : ''}{payingPerson === index ? ' (Paying)' : ''}: {getCurrencySymbol(currency)}{perPersonAmounts[index]}
+            </p>
           ))}
         </div>
       </div>
-    );
-  };
-
-  const perPersonAmounts = calculateSplit();
-
-  return (
-    <div style={styles.card}>
-      <h3>Split Summary</h3>
-      <div style={styles.summary}>
-        <p>Total Bill: {getCurrencySymbol(currency)}{totalBill.toFixed(2)}</p>
-        <p>Tip Percentage: {tipPercentage}%</p>
-        <p>Tip Amount: {getCurrencySymbol(currency)}{(totalBill * (tipPercentage / 100)).toFixed(2)}</p>
-        <p>Total Amount: {getCurrencySymbol(currency)}{(totalBill + totalBill * (tipPercentage / 100)).toFixed(2)}</p>
-        {names.map((name, index) => (
-          <p key={index}>
-            {name}{exemptPerson === index ? ' (Exempt)' : ''}: {getCurrencySymbol(currency)}{perPersonAmounts[index]}
-          </p>
-        ))}
-      </div>
-      {renderPieChart()}
+      <PieChartDisplay names={names} perPersonAmounts={perPersonAmounts.map(Number)} totalAmount={totalAmount} />
     </div>
   );
 };
@@ -323,6 +348,13 @@ const TipSelector = ({ tipPercentage, setTipPercentage, customTip, setCustomTip 
   );
 };
 
+  // Add this new component
+const ResetButton = ({ onReset }) => (
+  <button onClick={onReset} style={{...styles.button, backgroundColor: '#FF6B6B'}}>
+    Reset All
+  </button>
+);
+
 const SplitSmart = () => {
   const [totalBill, setTotalBill] = useState(100);
   const [numPeople, setNumPeople] = useState(2);
@@ -331,7 +363,8 @@ const SplitSmart = () => {
   const [customTip, setCustomTip] = useState('');
   const [currency, setCurrency] = useState('USD');
   const [exemptPerson, setExemptPerson] = useState(null);
-  const [shares, setShares] = useState([50, 50]); // Initial shares, assuming even split
+  const [payingPerson, setPayingPerson] = useState(null);
+  const [shares, setShares] = useState([50, 50]);
 
   useEffect(() => {
     setNames(prevNames => {
@@ -343,10 +376,22 @@ const SplitSmart = () => {
     });
 
     setShares(() => {
-      const evenSplit = 100 / numPeople; // Evenly distribute the percentage
-      return Array(numPeople).fill(evenSplit); // Create an array with the even split for all participants
+      const evenSplit = 100 / numPeople;
+      return Array(numPeople).fill(evenSplit);
     });
   }, [numPeople]);
+
+  const resetAll = () => {
+    setTotalBill(100);
+    setNumPeople(2);
+    setNames(['Person 1', 'Person 2']);
+    setTipPercentage(15);
+    setCustomTip('');
+    setCurrency('USD');
+    setExemptPerson(null);
+    setPayingPerson(null);
+    setShares([50, 50]);
+  };
 
   return (
     <div>
@@ -360,6 +405,7 @@ const SplitSmart = () => {
         setExemptPerson={setExemptPerson}
         shares={shares}
         setShares={setShares}
+        setPayingPerson={setPayingPerson}
       />
       <TipSelector 
         tipPercentage={tipPercentage} 
@@ -375,7 +421,9 @@ const SplitSmart = () => {
         exemptPerson={exemptPerson}
         names={names}
         shares={shares}
+        payingPerson={payingPerson}
       />
+      <ResetButton onReset={resetAll} />
     </div>
   );
 };
@@ -535,7 +583,9 @@ const App = () => {
   return (
     <div style={styles.container}>
       <Header onNavigate={setCurrentPage} />
-      <p style={styles.description}>Welcome to SplitSmart, your go-to app for easily dividing bills and expenses among groups. Enjoy fair and simple bill splitting with just a few clicks, including the option to randomly exempt a person from paying their share.</p>
+      <p style={styles.description}>Welcome to SplitSmart, your go-to app for easily dividing bills and expenses among groups. </p>
+
+      <p>Enjoy fair and simple bill splitting with just a few clicks, including the option to randomly exempt a person from paying their share or randomly select someone to pay the entire bill.</p>
       {renderPage()}
       <Footer onNavigate={setCurrentPage} />
     </div>
