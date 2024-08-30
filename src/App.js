@@ -12,13 +12,14 @@ const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#FFD93D'];
 
 const styles = {
   container: { 
-    fontFamily: 'Arial, sans-serif', 
-    maxWidth: '800px', 
-    margin: '0 auto', 
+    fontFamily: 'Quicksand, sans-serif', 
+    maxWidth: '100%', 
+    margin: '0', 
     padding: '20px', 
     backgroundColor: '#92EAEB', 
     color: '#000000', 
-    fontWeight: 'bold' 
+    fontWeight: 'bold',
+    minHeight: '100vh',
   },
   header: { 
     backgroundColor: '#FFADDE', 
@@ -113,7 +114,7 @@ const styles = {
 
 const Header = ({ onNavigate }) => (
   <header style={styles.header}>
-    <div style={styles.headerTitle}>SplitSmart by Voloview</div>
+    <div style={styles.headerTitle}>SplitSmart by Voloview.com</div>
     <nav style={styles.nav}>
       {['Home', 'About', 'Privacy', 'Terms'].map(item => (
         <button key={item} style={styles.button} onClick={() => onNavigate(item.toLowerCase())}>
@@ -195,6 +196,28 @@ const PeopleManager = ({ numPeople, setNumPeople, names, setNames, exemptPerson,
         </div>
       ))}
       <button onClick={randomizeExempt} style={styles.button}>Randomize Exempt Person</button>
+    </div>
+  );
+};
+
+const TipSelector = ({ tipPercentage, setTipPercentage }) => {
+  const presetTips = [15, 20, 25, 30];
+
+  return (
+    <div style={styles.card}>
+      <label style={styles.label}>Tip Percentage:</label>
+      <select value={tipPercentage} onChange={(e) => setTipPercentage(Number(e.target.value))} style={styles.select}>
+        {presetTips.map(tip => (
+          <option key={tip} value={tip}>{tip}%</option>
+        ))}
+      </select>
+      <label style={styles.label}>Or Enter Custom Tip:</label>
+      <input
+        type="number"
+        value={tipPercentage}
+        onChange={(e) => setTipPercentage(Number(e.target.value))}
+        style={styles.input}
+      />
     </div>
   );
 };
@@ -300,15 +323,7 @@ const SplitSmart = () => {
         shares={shares}
         setShares={setShares}
       />
-      <div style={styles.card}>
-        <label style={styles.label}>Tip Percentage:</label>
-        <input
-          type="number"
-          value={tipPercentage}
-          onChange={(e) => setTipPercentage(Number(e.target.value))}
-          style={styles.input}
-        />
-      </div>
+      <TipSelector tipPercentage={tipPercentage} setTipPercentage={setTipPercentage} />
       <SplitCalculator 
         totalBill={totalBill} 
         numPeople={numPeople} 
@@ -321,9 +336,6 @@ const SplitSmart = () => {
     </div>
   );
 };
-
-
-
 
 const AboutPage = () => (
   <div style={styles.card}>
@@ -343,8 +355,6 @@ const AboutPage = () => (
     <p>Address: 5000 W Midway Rd 13593, Ft. Pierce, FL 34979</p>
   </div>
 );
-
-
 
 const PrivacyPolicy = () => (
   <div style={styles.card}>
@@ -389,7 +399,6 @@ const PrivacyPolicy = () => (
   </div>
 );
 
-
 const TermsOfService = () => (
   <div style={styles.card}>
     <h2>Terms of Service</h2>
@@ -432,7 +441,6 @@ const TermsOfService = () => (
     </ul>
   </div>
 );
-
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
