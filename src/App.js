@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$' },
@@ -205,7 +205,6 @@ const SplitCalculator = ({ totalBill, numPeople, tipPercentage, currency, exempt
   const calculateSplit = () => {
     const tipAmount = totalBill * (tipPercentage / 100);
     const totalAmount = totalBill + tipAmount;
-    const payingPeople = exemptPerson === null ? numPeople : numPeople - 1;
 
     const totalShares = shares.reduce((acc, share, index) => {
       return exemptPerson !== index ? acc + share : acc;
@@ -220,8 +219,7 @@ const SplitCalculator = ({ totalBill, numPeople, tipPercentage, currency, exempt
   };
 
   const renderPieChart = () => {
-    const payingPeople = exemptPerson === null ? numPeople : numPeople - 1;
-    const anglePerPerson = 360 / payingPeople;
+    const anglePerPerson = 360 / (numPeople - (exemptPerson !== null ? 1 : 0));
     const background = names.map((_, index) => {
       if (index === exemptPerson) return '';
       const startAngle = index * anglePerPerson;
