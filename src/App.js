@@ -281,12 +281,9 @@ const SplitSmart = () => {
       return newNames.slice(0, numPeople);
     });
 
-    setShares(prevShares => {
-      const newShares = [...prevShares];
-      while (newShares.length < numPeople) {
-        newShares.push(100 / numPeople); // Default to even split for new people
-      }
-      return newShares.slice(0, numPeople);
+    setShares(() => {
+      const evenSplit = 100 / numPeople; // Evenly distribute the percentage
+      return Array(numPeople).fill(evenSplit); // Create an array with the even split for all participants
     });
   }, [numPeople]);
 
@@ -325,16 +322,29 @@ const SplitSmart = () => {
   );
 };
 
+
+
+
 const AboutPage = () => (
   <div style={styles.card}>
     <h2>About SplitSmart</h2>
-    <p>SplitSmart is an innovative bill-splitting application designed to simplify the process of dividing expenses among friends, family, or colleagues.</p>
+    <p>SplitSmart is an innovative bill-splitting application designed to simplify the process of dividing expenses among friends, family, or colleagues. Whether you’re sharing a meal, splitting rent, or managing group expenses, SplitSmart makes it easy and fair for everyone involved. The application allows users to input the total bill, specify the number of people, and determine each person’s share, including tips.</p>
+    
+    <p>One of the unique features of SplitSmart is its ability to handle special cases, such as exempting a person from paying their share. This is particularly useful when one person in the group needs to be treated differently, like a guest or a birthday celebrant. In addition, SplitSmart offers a randomization feature that can be used to randomly select someone to cover the entire bill, adding a fun element of surprise to group activities.</p>
+    
+    <h2>About Voloview.com and Pelican Pointe LLC</h2>
+    <p>Voloview.com is a service provided by Pelican Pointe LLC, a forward-thinking company dedicated to developing user-friendly applications that address everyday challenges. Pelican Pointe LLC focuses on simplicity and efficiency, ensuring that their products are both powerful and easy to use. From bill-splitting tools like SplitSmart to other innovative solutions, Pelican Pointe LLC is committed to making your life easier.</p>
+    
+    <p>To learn more about Pelican Pointe LLC and explore other exciting products and services, visit <a href="https://pelicanpointe.xyz" target="_blank" rel="noopener noreferrer">pelicanpointe.xyz</a>. Pelican Pointe LLC continues to push the boundaries of software development, always striving to deliver high-quality solutions that meet the evolving needs of modern users.</p>
+    
     <h3>Contact Information:</h3>
     <p>Email: info@voloview.com</p>
     <p>Phone: 321-405-3122</p>
     <p>Address: 5000 W Midway Rd 13593, Ft. Pierce, FL 34979</p>
   </div>
 );
+
+
 
 const PrivacyPolicy = () => (
   <div style={styles.card}>
