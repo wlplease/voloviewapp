@@ -26,18 +26,23 @@ const styles = {
     padding: '10px', 
     marginBottom: '20px',
     display: 'flex',
-    flexDirection: 'column',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: '24px',
     fontWeight: 'bold',
     color: '#000000',
-    marginBottom: '10px',
+  },
+  description: {
+    marginTop: '10px',
+    textAlign: 'center',
+    fontSize: '16px',
+    color: '#000000',
   },
   nav: { 
     display: 'flex', 
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     width: '100%',
   },
   button: { 
@@ -74,6 +79,10 @@ const styles = {
     textAlign: 'center', 
     color: '#000000', 
     fontWeight: 'bold' 
+  },
+  footerLinks: {
+    marginTop: '10px',
+    textAlign: 'center',
   },
   card: { 
     border: '1px solid #FFADDE', 
@@ -117,11 +126,8 @@ const styles = {
 const Header = ({ onNavigate }) => (
   <header style={styles.header}>
     <div style={styles.headerTitle}>SplitSmart by Voloview.com</div>
-    <p style={{ marginTop: '10px', textAlign: 'center', fontSize: '16px', color: '#000000' }}>
-      Welcome to SplitSmart, your go-to app for easily dividing bills and expenses among groups. Enjoy fair and simple bill splitting with just a few clicks.
-    </p>
     <nav style={styles.nav}>
-      {['Home', 'About', 'Privacy', 'Terms'].map(item => (
+      {['Home', 'About', 'Contact'].map(item => (
         <button key={item} style={styles.button} onClick={() => onNavigate(item.toLowerCase())}>
           {item}
         </button>
@@ -130,14 +136,13 @@ const Header = ({ onNavigate }) => (
   </header>
 );
 
-
 const Footer = ({ onNavigate }) => (
   <footer style={styles.footer}>
-    <p>© 2024 Pelican Pointe LLC. All rights reserved.</p>
-    <nav style={styles.nav}>
-      <a href="#" onClick={() => onNavigate('privacy')} style={styles.button}>Privacy Policy</a>
-      <a href="#" onClick={() => onNavigate('terms')} style={styles.button}>Terms of Service</a>
-    </nav>
+    <p>© 2024 Voloview.com | Pelican Pointe LLC. All rights reserved.</p>
+    <div style={styles.footerLinks}>
+      <button onClick={() => onNavigate('privacy')} style={styles.button}>Privacy Policy</button>
+      <button onClick={() => onNavigate('terms')} style={styles.button}>Terms of Service</button>
+    </div>
   </footer>
 );
 
@@ -162,22 +167,25 @@ const BillInput = ({ totalBill, setTotalBill, currency, setCurrency }) => {
 };
 
 const PeopleManager = ({ numPeople, setNumPeople, names, setNames, exemptPerson, setExemptPerson, shares, setShares }) => {
-  const randomizeExempt = () => {
+
+  const handleRandomizeExemptPerson = () => {
     const randomIndex = Math.floor(Math.random() * numPeople);
     setExemptPerson(randomIndex);
   };
 
   const handleShareChange = (index, value) => {
     const updatedShares = [...shares];
-    updatedShares[index] = Number(value);
+    updatedShares[index] = Number(value) || 0; // Ensure a valid number is assigned
     setShares(updatedShares);
   };
 
   return (
     <div style={styles.card}>
-      <label style={styles.label}>Number of People:</label>
+      <label style={styles.label}>Number of People: {numPeople}</label>
       <input
-        type="number"
+        type="range"
+        min="2"
+        max="50"
         value={numPeople}
         onChange={(e) => setNumPeople(Number(e.target.value))}
         style={styles.input}
@@ -205,7 +213,9 @@ const PeopleManager = ({ numPeople, setNumPeople, names, setNames, exemptPerson,
           />
         </div>
       ))}
-      <button onClick={randomizeExempt} style={styles.button}>Randomize Exempt Person</button>
+      <button onClick={handleRandomizeExemptPerson} style={styles.button}>
+        Randomize Exempt Person
+      </button>
     </div>
   );
 };
@@ -218,12 +228,12 @@ const SplitCalculator = ({ totalBill, numPeople, tipPercentage, currency, exempt
     const totalAmount = totalBill + tipAmount;
 
     const totalShares = shares.reduce((acc, share, index) => {
-      return exemptPerson !== index ? acc + share : acc;
+      return exemptPerson !== index ? acc + (share || 0) : acc;
     }, 0);
 
     const perPersonAmounts = shares.map((share, index) => {
       if (exemptPerson === index) return 0;
-      return ((totalAmount * share) / totalShares).toFixed(2);
+      return ((totalAmount * (share || 0)) / totalShares).toFixed(2);
     });
 
     return perPersonAmounts;
@@ -381,13 +391,15 @@ const AboutPage = ({ onNavigate }) => (
     <p>Voloview.com is a service provided by Pelican Pointe LLC, a forward-thinking company dedicated to developing user-friendly applications that address everyday challenges. Pelican Pointe LLC focuses on simplicity and efficiency, ensuring that their products are both powerful and easy to use. From bill-splitting tools like SplitSmart to other innovative solutions, Pelican Pointe LLC is committed to making your life easier.</p>
     
     <p>To learn more about Pelican Pointe LLC and explore other exciting products and services, visit <a href="https://pelicanpointe.xyz" target="_blank" rel="noopener noreferrer">pelicanpointe.xyz</a>. Pelican Pointe LLC continues to push the boundaries of software development, always striving to deliver high-quality solutions that meet the evolving needs of modern users.</p>
-    
-    <h3>Contact Information:</h3>
-    <p>Email: info@voloview.com</p>
-    <p>Phone: 321-405-3122</p>
-    <p>Address: 5000 W Midway Rd 13593, Ft. Pierce, FL 34979</p>
 
-    <h3>Contact Us:</h3>
+    <p style={{ textAlign: 'center', marginTop: '20px', fontWeight: 'bold' }}>Enjoy happy tipping!</p>
+  </div>
+);
+
+const ContactPage = ({ onNavigate }) => (
+  <div style={styles.card}>
+    <h2>Contact Us</h2>
+     <h3>info@voloview.com</h3>
     <form>
       <label style={styles.label}>Name:</label>
       <input type="text" name="name" style={styles.input} />
@@ -401,15 +413,17 @@ const AboutPage = ({ onNavigate }) => (
       <label style={styles.label}>Comments:</label>
       <textarea name="comments" style={{...styles.input, height: '100px'}} />
       
-      <label style={{display: 'flex', alignItems: 'center', margin: '10px 0'}}>
-        <input type="checkbox" name="agree" style={{marginRight: '10px'}} />
-        I agree to the <a href="#" onClick={() => onNavigate('terms')} style={{textDecoration: 'underline'}}>Terms of Service</a>
-      </label>
+     <label style={{ display: 'flex', alignItems: 'center', margin: '10px 0' }}>
+  <input type="checkbox" name="agree" style={{ marginRight: '10px' }} />
+  I agree to the 
+  <a href="#" onClick={() => onNavigate('terms')} style={{ textDecoration: 'underline', marginLeft: '5px' }}>Terms of Service</a> 
+  and 
+  <a href="#" onClick={() => onNavigate('privacy')} style={{ textDecoration: 'underline', marginLeft: '5px' }}>Privacy Policy</a>.
+</label>
+
       
       <button type="submit" style={styles.button}>Submit</button>
     </form>
-
-    <p style={{ textAlign: 'center', marginTop: '20px', fontWeight: 'bold' }}>Enjoy happy tipping!</p>
   </div>
 );
 
@@ -506,6 +520,8 @@ const App = () => {
     switch (currentPage) {
       case 'about':
         return <AboutPage onNavigate={setCurrentPage} />;
+      case 'contact':
+        return <ContactPage onNavigate={setCurrentPage} />;
       case 'privacy':
         return <PrivacyPolicy onNavigate={setCurrentPage} />;
       case 'terms':
@@ -518,6 +534,7 @@ const App = () => {
   return (
     <div style={styles.container}>
       <Header onNavigate={setCurrentPage} />
+      <p style={styles.description}>Welcome to SplitSmart, your go-to app for easily dividing bills and expenses among groups. Enjoy fair and simple bill splitting with just a few clicks, including the option to randomly exempt a person from paying their share.</p>
       {renderPage()}
       <Footer onNavigate={setCurrentPage} />
     </div>
