@@ -47,20 +47,22 @@ const styles = {
     color: '#000000', 
     border: 'none', 
     cursor: 'pointer', 
-    fontWeight: 'bold' 
+    fontWeight: 'bold',
+    flexGrow: 1,
+    textAlign: 'center',
   },
   input: { 
-    width: '100%', 
+    width: 'calc(100% - 20px)', 
     padding: '10px', 
-    margin: '5px 0', 
+    margin: '5px 10px', 
     backgroundColor: '#FFFFFF', 
     color: '#000000', 
     fontWeight: 'bold' 
   },
   select: { 
-    width: '100%', 
+    width: 'calc(100% - 20px)', 
     padding: '10px', 
-    margin: '5px 0', 
+    margin: '5px 10px', 
     backgroundColor: '#FFFFFF', 
     color: '#000000', 
     fontWeight: 'bold' 
@@ -110,18 +112,14 @@ const styles = {
     border: '1px solid #FFADDE',
     backgroundColor: '#F0F0F0',
   },
-  formGroup: {
-    marginBottom: '10px',
-  },
-  checkboxLabel: {
-    marginLeft: '5px',
-    fontWeight: 'bold',
-  },
 };
 
 const Header = ({ onNavigate }) => (
   <header style={styles.header}>
     <div style={styles.headerTitle}>SplitSmart by Voloview.com</div>
+    <p style={{ marginTop: '10px', textAlign: 'center', fontSize: '16px', color: '#000000' }}>
+      Welcome to SplitSmart, your go-to app for easily dividing bills and expenses among groups. Enjoy fair and simple bill splitting with just a few clicks.
+    </p>
     <nav style={styles.nav}>
       {['Home', 'About', 'Privacy', 'Terms'].map(item => (
         <button key={item} style={styles.button} onClick={() => onNavigate(item.toLowerCase())}>
@@ -132,14 +130,14 @@ const Header = ({ onNavigate }) => (
   </header>
 );
 
-const Footer = () => (
+
+const Footer = ({ onNavigate }) => (
   <footer style={styles.footer}>
     <p>© 2024 Pelican Pointe LLC. All rights reserved.</p>
-    <p>
-      <a href="#privacy" onClick={() => window.scrollTo(0, document.getElementById('privacy').offsetTop)}>Privacy Policy</a> | 
-      <a href="#terms" onClick={() => window.scrollTo(0, document.getElementById('terms').offsetTop)}> Terms of Service</a>
-    </p>
-    <p>Enjoy your experience and happy tipping!</p>
+    <nav style={styles.nav}>
+      <a href="#" onClick={() => onNavigate('privacy')} style={styles.button}>Privacy Policy</a>
+      <a href="#" onClick={() => onNavigate('terms')} style={styles.button}>Terms of Service</a>
+    </nav>
   </footer>
 );
 
@@ -276,31 +274,41 @@ const SplitCalculator = ({ totalBill, numPeople, tipPercentage, currency, exempt
   );
 };
 
-const TipInput = ({ tipPercentage, setTipPercentage }) => {
+const TipSelector = ({ tipPercentage, setTipPercentage, customTip, setCustomTip }) => {
+  const predefinedTips = [15, 20, 25, 30];
+
   return (
     <div style={styles.card}>
       <label style={styles.label}>Tip Percentage:</label>
-      <select
-        value={tipPercentage}
-        onChange={(e) => setTipPercentage(Number(e.target.value))}
-        style={styles.select}
-      >
-        {[15, 20, 25, 30].map((percent) => (
-          <option key={percent} value={percent}>
-            {percent}%
-          </option>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+        {predefinedTips.map(tip => (
+          <button
+            key={tip}
+            style={{
+              ...styles.button,
+              backgroundColor: tipPercentage === tip ? '#FF6B6B' : '#FFADDE',
+              width: 'calc(25% - 10px)',
+            }}
+            onClick={() => {
+              setCustomTip('');
+              setTipPercentage(tip);
+            }}
+          >
+            {tip}%
+          </button>
         ))}
-        <option value="custom">Custom</option>
-      </select>
-      {tipPercentage === 'custom' && (
-        <input
-          type="number"
-          value={tipPercentage}
-          onChange={(e) => setTipPercentage(Number(e.target.value))}
-          placeholder="Enter custom tip"
-          style={styles.input}
-        />
-      )}
+      </div>
+      <label style={styles.label}>Custom Tip:</label>
+      <input
+        type="number"
+        value={customTip}
+        placeholder="Enter custom tip"
+        onChange={(e) => {
+          setTipPercentage(Number(e.target.value));
+          setCustomTip(e.target.value);
+        }}
+        style={styles.input}
+      />
     </div>
   );
 };
@@ -310,6 +318,7 @@ const SplitSmart = () => {
   const [numPeople, setNumPeople] = useState(2);
   const [names, setNames] = useState(['Person 1', 'Person 2']);
   const [tipPercentage, setTipPercentage] = useState(15);
+  const [customTip, setCustomTip] = useState('');
   const [currency, setCurrency] = useState('USD');
   const [exemptPerson, setExemptPerson] = useState(null);
   const [shares, setShares] = useState([50, 50]); // Initial shares, assuming even split
@@ -342,7 +351,12 @@ const SplitSmart = () => {
         shares={shares}
         setShares={setShares}
       />
-      <TipInput tipPercentage={tipPercentage} setTipPercentage={setTipPercentage} />
+      <TipSelector 
+        tipPercentage={tipPercentage} 
+        setTipPercentage={setTipPercentage} 
+        customTip={customTip}
+        setCustomTip={setCustomTip}
+      />
       <SplitCalculator 
         totalBill={totalBill} 
         numPeople={numPeople} 
@@ -356,117 +370,51 @@ const SplitSmart = () => {
   );
 };
 
-const AboutPage = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    comments: '',
-    agreeToTerms: false,
-  });
+const AboutPage = ({ onNavigate }) => (
+  <div style={styles.card}>
+    <h2>About SplitSmart</h2>
+    <p>SplitSmart is an innovative bill-splitting application designed to simplify the process of dividing expenses among friends, family, or colleagues. Whether you’re sharing a meal, splitting rent, or managing group expenses, SplitSmart makes it easy and fair for everyone involved. The application allows users to input the total bill, specify the number of people, and determine each person’s share, including tips.</p>
+    
+    <p>One of the unique features of SplitSmart is its ability to handle special cases, such as exempting a person from paying their share. This is particularly useful when one person in the group needs to be treated differently, like a guest or a birthday celebrant. In addition, SplitSmart offers a randomization feature that can be used to randomly select someone to cover the entire bill, adding a fun element of surprise to group activities.</p>
+    
+    <h2>About Voloview.com and Pelican Pointe LLC</h2>
+    <p>Voloview.com is a service provided by Pelican Pointe LLC, a forward-thinking company dedicated to developing user-friendly applications that address everyday challenges. Pelican Pointe LLC focuses on simplicity and efficiency, ensuring that their products are both powerful and easy to use. From bill-splitting tools like SplitSmart to other innovative solutions, Pelican Pointe LLC is committed to making your life easier.</p>
+    
+    <p>To learn more about Pelican Pointe LLC and explore other exciting products and services, visit <a href="https://pelicanpointe.xyz" target="_blank" rel="noopener noreferrer">pelicanpointe.xyz</a>. Pelican Pointe LLC continues to push the boundaries of software development, always striving to deliver high-quality solutions that meet the evolving needs of modern users.</p>
+    
+    <h3>Contact Information:</h3>
+    <p>Email: info@voloview.com</p>
+    <p>Phone: 321-405-3122</p>
+    <p>Address: 5000 W Midway Rd 13593, Ft. Pierce, FL 34979</p>
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.agreeToTerms) {
-      // Simulate email sending
-      alert('Form submitted successfully!');
-      // Here you would actually handle the form submission
-    } else {
-      alert('You must agree to the terms and conditions before submitting.');
-    }
-  };
-
-  return (
-    <div style={styles.card}>
-      <h2>About SplitSmart</h2>
-      <p>SplitSmart is an innovative bill-splitting application designed to simplify the process of dividing expenses among friends, family, or colleagues. Whether you’re sharing a meal, splitting rent, or managing group expenses, SplitSmart makes it easy and fair for everyone involved. The application allows users to input the total bill, specify the number of people, and determine each person’s share, including tips.</p>
+    <h3>Contact Us:</h3>
+    <form>
+      <label style={styles.label}>Name:</label>
+      <input type="text" name="name" style={styles.input} />
       
-      <p>One of the unique features of SplitSmart is its ability to handle special cases, such as exempting a person from paying their share. This is particularly useful when one person in the group needs to be treated differently, like a guest or a birthday celebrant. In addition, SplitSmart offers a randomization feature that can be used to randomly select someone to cover the entire bill, adding a fun element of surprise to group activities.</p>
+      <label style={styles.label}>Email:</label>
+      <input type="email" name="email" style={styles.input} />
       
-      <h2>About Voloview.com and Pelican Pointe LLC</h2>
-      <p>Voloview.com is a service provided by Pelican Pointe LLC, a forward-thinking company dedicated to developing user-friendly applications that address everyday challenges. Pelican Pointe LLC focuses on simplicity and efficiency, ensuring that their products are both powerful and easy to use. From bill-splitting tools like SplitSmart to other innovative solutions, Pelican Pointe LLC is committed to making your life easier.</p>
+      <label style={styles.label}>Subject:</label>
+      <input type="text" name="subject" style={styles.input} />
       
-      <p>To learn more about Pelican Pointe LLC and explore other exciting products and services, visit <a href="https://pelicanpointe.xyz" target="_blank" rel="noopener noreferrer">pelicanpointe.xyz</a>. Pelican Pointe LLC continues to push the boundaries of software development, always striving to deliver high-quality solutions that meet the evolving needs of modern users.</p>
+      <label style={styles.label}>Comments:</label>
+      <textarea name="comments" style={{...styles.input, height: '100px'}} />
       
-      <h3>Contact Information:</h3>
-      <p>Email: info@voloview.com</p>
-      <p>Phone: 321-405-3122</p>
-      <p>Address: 5000 W Midway Rd 13593, Ft. Pierce, FL 34979</p>
+      <label style={{display: 'flex', alignItems: 'center', margin: '10px 0'}}>
+        <input type="checkbox" name="agree" style={{marginRight: '10px'}} />
+        I agree to the <a href="#" onClick={() => onNavigate('terms')} style={{textDecoration: 'underline'}}>Terms of Service</a>
+      </label>
+      
+      <button type="submit" style={styles.button}>Submit</button>
+    </form>
 
-      <h3>Contact Us</h3>
-      <form onSubmit={handleSubmit}>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Name:</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-        </div>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Email:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-        </div>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Subject:</label>
-          <input
-            type="text"
-            name="subject"
-            value={formData.subject}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-        </div>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Comments:</label>
-          <textarea
-            name="comments"
-            value={formData.comments}
-            onChange={handleChange}
-            style={styles.input}
-            required
-          />
-        </div>
-        <div style={styles.formGroup}>
-          <input
-            type="checkbox"
-            name="agreeToTerms"
-            checked={formData.agreeToTerms}
-            onChange={handleChange}
-            required
-          />
-          <label style={styles.checkboxLabel}>
-            I agree to the <a href="#terms">terms and conditions</a>
-          </label>
-        </div>
-        <button type="submit" style={styles.button}>Submit</button>
-      </form>
-      <p>Enjoy your experience and happy tipping!</p>
-    </div>
-  );
-};
+    <p style={{ textAlign: 'center', marginTop: '20px', fontWeight: 'bold' }}>Enjoy happy tipping!</p>
+  </div>
+);
 
-const PrivacyPolicy = () => (
-  <div id="privacy" style={styles.card}>
+const PrivacyPolicy = ({ onNavigate }) => (
+  <div style={styles.card}>
     <h2>Privacy Policy</h2>
     <p>We respect your privacy and are committed to protecting your personal information. This Privacy Policy outlines how we collect, use, and safeguard your data when you use our service.</p>
 
@@ -508,8 +456,8 @@ const PrivacyPolicy = () => (
   </div>
 );
 
-const TermsOfService = () => (
-  <div id="terms" style={styles.card}>
+const TermsOfService = ({ onNavigate }) => (
+  <div style={styles.card}>
     <h2>Terms of Service</h2>
     <p>By using SplitSmart, you agree to abide by our terms of service. Please read these terms carefully before using our platform.</p>
 
@@ -557,11 +505,11 @@ const App = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'about':
-        return <AboutPage />;
+        return <AboutPage onNavigate={setCurrentPage} />;
       case 'privacy':
-        return <PrivacyPolicy />;
+        return <PrivacyPolicy onNavigate={setCurrentPage} />;
       case 'terms':
-        return <TermsOfService />;
+        return <TermsOfService onNavigate={setCurrentPage} />;
       default:
         return <SplitSmart />;
     }
@@ -571,7 +519,7 @@ const App = () => {
     <div style={styles.container}>
       <Header onNavigate={setCurrentPage} />
       {renderPage()}
-      <Footer />
+      <Footer onNavigate={setCurrentPage} />
     </div>
   );
 };
